@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Мои отчеты — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Мои отчеты</h1>
+    <p>Создавайте отчеты по каждой игре, прикладывайте файлы и отслеживайте комментарии администратора.</p>
+  </div>
+  <div class="actions">
+    <a class="btn-secondary btn" href="{{ url_for('export_reports_csv') }}">Выгрузить CSV</a>
+    <a class="btn" href="{{ url_for('create_report') }}">Создать отчет</a>
+  </div>
+</div>
+<section class="card">
+  <table class="list-table">
+    <thead><tr><th>Дата</th><th>Игра</th><th>Статус</th><th>Продано</th><th>Выручка</th><th>Комментарии</th><th></th></tr></thead>
+    <tbody>
+      {% for report in reports %}
+      <tr>
+        <td>{{ report.report_date|shortdate }}</td>
+        <td>{{ report.match_title }}</td>
+        <td><span class="badge {{ report.status }}">{{ status_label(report.status) }}</span></td>
+        <td>{{ report.total_items }}</td>
+        <td>{{ report.total_revenue|currency }}</td>
+        <td>{{ report.comments_count }}</td>
+        <td><a class="btn btn-secondary" href="{{ url_for('report_detail', report_id=report.id) }}">Информация</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">У вас пока нет отчетов.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

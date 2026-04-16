@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}{{ display_name(photographer) }} — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Информация о фотографе</h1>
+    <p>{{ display_name(photographer) }}</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{{ url_for('edit_photographer', user_id=photographer.id) }}">Редактировать</a>
+    <form method="post" action="{{ url_for('delete_photographer', user_id=photographer.id) }}" onsubmit="return confirm('Удалить фотографа?');">
+      <button class="btn btn-danger" type="submit">Удалить</button>
+    </form>
+  </div>
+</div>
+<div class="grid">
+  <section class="card span-5">
+    <h2 class="section-title">Профиль</h2>
+    <p><strong>Логин:</strong> {{ photographer.login }}</p>
+    <p><strong>Статус:</strong> {{ 'Активен' if photographer.is_active else 'Отключен' }}</p>
+    <p><strong>Дата создания:</strong> {{ photographer.created_at }}</p>
+  </section>
+  <section class="card span-7">
+    <h2 class="section-title">Выручка по категориям</h2>
+    <div class="pie-wrap">
+      {{ chart_svg|safe if chart_svg else '<p class="subtle">Нет данных для диаграммы.</p>'|safe }}
+      <div class="legend">
+        {% for label, revenue in stats.revenue_by_product.items() %}
+          <div class="legend-row"><span>{{ label }}</span><strong>{{ revenue|currency }}</strong></div>
+        {% else %}
+          <p class="subtle">Нет данных.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+<div class="stats-grid top-gap">
+  <div class="stat-box"><span class="label">Отчетов</span><div class="value">{{ stats.reports_count }}</div></div>
+  <div class="stat-box"><span class="label">Продано</span><div class="value">{{ stats.total_items }}</div></div>
+  <div class="stat-box"><span class="label">Выручка</span><div class="value">{{ stats.total_revenue|currency }}</div></div>
+</div>
+<section class="card top-gap">
+  <h2 class="section-title">Последние отчеты</h2>
+  <table class="list-table">
+    <thead><tr><th>Дата</th><th>Игра</th><th>Статус</th><th>Выручка</th><th></th></tr></thead>
+    <tbody>
+      {% for report in recent_reports %}
+      <tr>
+        <td>{{ report.report_date|shortdate }}</td>
+        <td>{{ report.match_title }}</td>
+        <td><span class="badge {{ report.status }}">{{ status_label(report.status) }}</span></td>
+        <td>{{ report.total_revenue|currency }}</td>
+        <td><a class="btn btn-secondary" href="{{ url_for('admin_report_detail', report_id=report.id) }}">Открыть</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">У фотографа пока нет отчетов.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Материалы — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Расходные материалы</h1>
+    <p>CRUD-интерфейс для материалов и учет пополнений/списаний.</p>
+  </div>
+</div>
+<div class="grid">
+  <section class="card span-5">
+    <h2 class="section-title">Добавить материал</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="create">
+      <div class="form-grid">
+        <div class="form-group"><label>Название</label><input type="text" name="name" required></div>
+        <div class="form-group"><label>Код</label><input type="text" name="code" placeholder="paper_a6" required></div>
+        <div class="form-group"><label>Цена продажи</label><input type="number" name="unit_price" step="0.01" min="0" required></div>
+        <div class="form-group"><label>Стартовый остаток</label><input type="number" name="current_stock" min="0" required></div>
+      </div>
+      <button class="btn top-gap" type="submit">Добавить</button>
+    </form>
+  </section>
+  <section class="card span-7">
+    <h2 class="section-title">Пополнение остатков</h2>
+    <form method="post" class="form-grid">
+      <input type="hidden" name="action" value="restock">
+      <div class="form-group">
+        <label>Материал</label>
+        <select name="product_id" required>
+          {% for product in products %}
+            <option value="{{ product.id }}">{{ product.name }} (остаток: {{ product.current_stock }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group"><label>Количество</label><input type="number" name="quantity" min="1" required></div>
+      <div class="form-group full"><label>Комментарий</label><input type="text" name="note" placeholder="Например, новая поставка бумаги"></div>
+      <div class="form-group full"><button class="btn" type="submit">Пополнить остаток</button></div>
+    </form>
+  </section>
+</div>
+<section class="card top-gap">
+  <h2 class="section-title">Список материалов</h2>
+  <table class="list-table">
+    <thead><tr><th>Название</th><th>Код</th><th>Цена</th><th>Остаток</th><th>Архив</th><th>Управление</th></tr></thead>
+    <tbody>
+      {% for product in products %}
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.code }}</td>
+        <td>{{ product.unit_price|currency }}</td>
+        <td>{{ product.current_stock }}</td>
+        <td>{{ 'Да' if product.is_archived else 'Нет' }}</td>
+        <td>
+          <form method="post" action="{{ url_for('edit_consumable', product_id=product.id) }}" class="inline-form">
+            <input type="text" name="name" value="{{ product.name }}" required>
+            <input type="number" name="unit_price" step="0.01" min="0" value="{{ product.unit_price }}" required>
+            <select name="is_archived">
+              <option value="0" {% if not product.is_archived %}selected{% endif %}>Активен</option>
+              <option value="1" {% if product.is_archived %}selected{% endif %}>В архиве</option>
+            </select>
+            <button class="btn btn-secondary" type="submit">Сохранить</button>
+          </form>
+          <form method="post" action="{{ url_for('delete_consumable', product_id=product.id) }}" class="inline-form top-gap" onsubmit="return confirm('Удалить материал?');">
+            <button class="btn btn-danger" type="submit">Удалить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Материалов пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+<section class="card top-gap">
+  <h2 class="section-title">Последние движения по складу</h2>
+  <table class="list-table">
+    <thead><tr><th>Дата</th><th>Материал</th><th>Тип</th><th>Количество</th><th>Комментарий</th><th>Кто внес</th></tr></thead>
+    <tbody>
+      {% for row in movements %}
+      <tr>
+        <td>{{ row.created_at }}</td>
+        <td>{{ row.product_name }}</td>
+        <td>{{ row.movement_type }}</td>
+        <td>{{ row.quantity }}</td>
+        <td>{{ row.note }}</td>
+        <td>{{ display_name(row) if row.first_name else 'Система' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">История пока пуста.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

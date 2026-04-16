@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Статистика администратора — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Статистика</h1>
+    <p>Общие показатели по всем фотографам, отчетам и остаткам расходных материалов.</p>
+  </div>
+  <div class="actions">
+    <a class="btn-secondary btn" href="{{ url_for('export_stats_csv') }}">Выгрузить статистику</a>
+  </div>
+</div>
+<div class="stats-grid">
+  <div class="stat-box"><span class="label">Всего отчетов</span><div class="value">{{ stats.reports_count }}</div></div>
+  <div class="stat-box"><span class="label">Продано позиций</span><div class="value">{{ stats.total_items }}</div></div>
+  <div class="stat-box"><span class="label">Общая выручка</span><div class="value">{{ stats.total_revenue|currency }}</div></div>
+</div>
+<div class="grid top-gap">
+  <section class="card span-4">
+    <h2 class="section-title">Количество продаж</h2>
+    <div class="legend">
+      {% for label, qty in stats.quantity_by_product.items() %}
+        <div class="legend-row"><span>{{ label }}</span><strong>{{ qty }}</strong></div>
+      {% else %}
+        <p class="subtle">Нет данных.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="card span-8">
+    <h2 class="section-title">Выручка по категориям</h2>
+    <div class="pie-wrap">
+      {{ chart_svg|safe if chart_svg else '<p class="subtle">Нет данных для диаграммы.</p>'|safe }}
+      <div class="legend">
+        {% for label, revenue in stats.revenue_by_product.items() %}
+          <div class="legend-row"><span>{{ label }}</span><strong>{{ revenue|currency }}</strong></div>
+        {% else %}
+          <p class="subtle">Нет данных.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+<div class="grid top-gap">
+  <section class="card span-7">
+    <h2 class="section-title">Рейтинг фотографов</h2>
+    <table class="list-table">
+      <thead><tr><th>Фотограф</th><th>Продано</th><th>Выручка</th></tr></thead>
+      <tbody>
+        {% for row in ranking %}
+          <tr><td>{{ row.full_name }}</td><td>{{ row.items_sold }}</td><td>{{ row.revenue|currency }}</td></tr>
+        {% else %}
+          <tr><td colspan="3">Нет данных.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="card span-5">
+    <h2 class="section-title">Минимальные остатки</h2>
+    <div class="legend">
+      {% for item in low_stock %}
+        <div class="legend-row"><span>{{ item.name }}</span><strong>{{ item.current_stock }}</strong></div>
+      {% else %}
+        <p class="subtle">Нет данных.</p>
+      {% endfor %}
+    </div>
+    <div class="actions top-gap">
+      <a class="btn" href="{{ url_for('admin_consumables') }}">Управлять материалами</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

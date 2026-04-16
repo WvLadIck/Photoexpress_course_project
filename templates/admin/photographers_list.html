@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Фотографы — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Фотографы</h1>
+    <p>Управление учетными записями фотографов и просмотр их индивидуальной статистики.</p>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('create_photographer') }}">Добавить фотографа</a>
+  </div>
+</div>
+<section class="card">
+  <table class="list-table">
+    <thead><tr><th>ФИО</th><th>Логин</th><th>Отчеты</th><th>Выручка</th><th>Статус</th><th></th></tr></thead>
+    <tbody>
+      {% for photographer in photographers %}
+      <tr>
+        <td>{{ display_name(photographer) }}</td>
+        <td>{{ photographer.login }}</td>
+        <td>{{ photographer.reports_count }}</td>
+        <td>{{ photographer.total_revenue|currency }}</td>
+        <td>{{ 'Активен' if photographer.is_active else 'Отключен' }}</td>
+        <td><a class="btn btn-secondary" href="{{ url_for('photographer_detail', user_id=photographer.id) }}">Информация</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Фотографов пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

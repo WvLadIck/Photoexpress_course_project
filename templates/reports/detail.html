@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Отчет {{ report.id }} — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Информация по игре</h1>
+    <p>{{ report.report_date|shortdate }} · {{ report.match_title }} · {{ display_name(report) }}</p>
+  </div>
+  <div class="actions">
+    {% if current_user.role_code == 'photographer' %}
+      {% if report.status != 'reviewed' %}
+        <a class="btn btn-secondary" href="{{ url_for('edit_report', report_id=report.id) }}">Редактировать</a>
+        <form method="post" action="{{ url_for('delete_report', report_id=report.id) }}" onsubmit="return confirm('Удалить отчет?');">
+          <button class="btn btn-danger" type="submit">Удалить</button>
+        </form>
+      {% endif %}
+      <a class="btn btn-secondary" href="{{ url_for('my_reports') }}">Назад</a>
+    {% else %}
+      <a class="btn btn-secondary" href="{{ url_for('admin_reports') }}">К списку отчетов</a>
+    {% endif %}
+  </div>
+</div>
+<div class="grid">
+  <section class="card span-5">
+    <h2 class="section-title">Продано за игру</h2>
+    <div class="legend">
+      {% for item in items %}
+        <div class="legend-row"><span>{{ item.product_name }}</span><strong>{{ item.quantity }}</strong></div>
+      {% endfor %}
+    </div>
+  </section>
+  <section class="card span-7">
+    <h2 class="section-title">Выручка за игру</h2>
+    <div class="pie-wrap">
+      {{ chart_svg|safe if chart_svg else '<p class="subtle">Нет данных для диаграммы.</p>'|safe }}
+      <div class="legend">
+        {% for item in items %}
+          <div class="legend-row"><span>{{ item.product_name }}</span><strong>{{ item.revenue|currency }}</strong></div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+<section class="card top-gap">
+  <h2 class="section-title">Описание отчета</h2>
+  <p><strong>Локация:</strong> {{ report.location or '—' }}</p>
+  <p><strong>Комментарий фотографа:</strong> {{ report.note or '—' }}</p>
+  <p><strong>Статус:</strong> <span class="badge {{ report.status }}">{{ status_label(report.status) }}</span></p>
+</section>
+<section class="card top-gap">
+  <h2 class="section-title">Файлы отчета</h2>
+  <div class="file-list">
+    {% for file in attachments %}
+      <div class="file-item">
+        <div>
+          <strong>{{ file.original_filename }}</strong>
+          <div class="meta">Добавлен {{ file.created_at }}</div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-secondary" href="{{ url_for('download_attachment', attachment_id=file.id) }}">Скачать</a>
+          {% if current_user.role_code == 'admin' or report.status != 'reviewed' %}
+            <form method="post" action="{{ url_for('delete_attachment', attachment_id=file.id) }}" onsubmit="return confirm('Удалить файл?');">
+              <button class="btn btn-danger" type="submit">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <p class="subtle">Файлы не загружены.</p>
+    {% endfor %}
+  </div>
+</section>
+<section class="card top-gap">
+  <h2 class="section-title">Комментарии администратора</h2>
+  <div class="comment-list">
+    {% for comment in comments %}
+      <div class="comment-item">
+        <strong>{{ display_name(comment) }}</strong>
+        <div>{{ comment.comment_text }}</div>
+        <div class="meta">{{ comment.created_at }}</div>
+      </div>
+    {% else %}
+      <p class="subtle">Комментариев пока нет.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

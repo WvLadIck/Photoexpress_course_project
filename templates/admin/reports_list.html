@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Отчеты — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Отчеты</h1>
+    <p>Проверка отчетов фотографов, просмотр файлов и отправка комментариев по каждой игре.</p>
+  </div>
+  <div class="actions">
+    <a class="btn-secondary btn" href="{{ url_for('export_reports_csv') }}">Выгрузить CSV</a>
+  </div>
+</div>
+<section class="card">
+  <table class="list-table">
+    <thead><tr><th>Дата</th><th>Фотограф</th><th>Игра</th><th>Статус</th><th>Выручка</th><th></th></tr></thead>
+    <tbody>
+      {% for report in reports %}
+      <tr>
+        <td>{{ report.report_date|shortdate }}</td>
+        <td>{{ display_name(report) }}</td>
+        <td>{{ report.match_title }}</td>
+        <td><span class="badge {{ report.status }}">{{ status_label(report.status) }}</span></td>
+        <td>{{ report.total_revenue|currency }}</td>
+        <td><a class="btn btn-secondary" href="{{ url_for('admin_report_detail', report_id=report.id) }}">Информация</a></td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Отчетов пока нет.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

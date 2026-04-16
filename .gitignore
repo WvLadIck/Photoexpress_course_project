@@ -1,0 +1,41 @@
+# Виртуальное окружение
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# База данных и instance
+instance/
+instance/photoexpress.db
+
+# Загрузки пользователей
+uploads/
+static/uploads/
+
+# Переменные окружения
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# LaTeX временные файлы
+*.aux
+*.log
+*.toc
+*.out
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.nav
+*.snm
+*.bbl
+*.blg

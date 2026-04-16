@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}{% if mode == 'create' %}Новый отчет{% else %}Редактирование отчета{% endif %} — ФотоЭкспресс{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{% if mode == 'create' %}Новый отчет{% else %}Редактирование отчета{% endif %}</h1>
+    <p>Заполните продажи по каждой категории и при необходимости приложите файлы отчетности.</p>
+  </div>
+  <div class="actions">
+    <a class="btn btn-secondary" href="{{ url_for('my_reports') }}">Назад к списку</a>
+  </div>
+</div>
+<form class="card" method="post" enctype="multipart/form-data">
+  <div class="form-grid">
+    <div class="form-group">
+      <label for="report_date">Дата</label>
+      <input id="report_date" type="date" name="report_date" value="{{ values.get('report_date', today_iso) }}" required>
+    </div>
+    <div class="form-group">
+      <label for="match_title">Игра / мероприятие</label>
+      <input id="match_title" type="text" name="match_title" value="{{ values.get('match_title', '') }}" placeholder="Например, Спартак — Динамо" required>
+    </div>
+    <div class="form-group full">
+      <label for="location">Локация</label>
+      <input id="location" type="text" name="location" value="{{ values.get('location', '') }}" placeholder="Стадион или площадка">
+    </div>
+    {% for product in products %}
+      <div class="form-group">
+        <label for="product_{{ product.id }}">{{ product.name }}</label>
+        <input id="product_{{ product.id }}" type="number" min="0" name="product_{{ product.id }}" value="{{ values.get('product_' ~ product.id, 0) }}" required>
+        <span class="help-text">Цена продажи: {{ product.unit_price|currency }}. Остаток: {{ product.current_stock }}</span>
+      </div>
+    {% endfor %}
+    <div class="form-group full">
+      <label for="note">Комментарий фотографа</label>
+      <textarea id="note" name="note" placeholder="Любая дополнительная информация по отчету">{{ values.get('note', '') }}</textarea>
+    </div>
+    <div class="form-group full">
+      <label for="files">Файлы</label>
+      <input id="files" type="file" name="files" multiple>
+      <span class="help-text">Допустимые форматы: PDF, CSV, XLSX, JPG, PNG.</span>
+    </div>
+  </div>
+  <div class="actions top-gap">
+    <button class="btn" type="submit">{% if mode == 'create' %}Создать отчет{% else %}Сохранить изменения{% endif %}</button>
+    <a class="btn btn-secondary" href="{% if mode == 'create' %}{{ url_for('my_reports') }}{% else %}{{ url_for('report_detail', report_id=report.id) }}{% endif %}">Отмена</a>
+  </div>
+</form>
+{% endblock %}

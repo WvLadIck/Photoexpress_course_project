@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ФотоЭкспресс{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  </head>
+  <body>
+    {% if current_user.is_authenticated %}
+      <div class="layout">
+        <aside class="sidebar">
+          <div class="logo">ЛОГО</div>
+          <div class="user-card">
+            <small>{{ current_user.role_name }}</small>
+            <strong>{{ current_user.full_name }}</strong>
+            <div class="meta top-gap">Логин: {{ current_user.login }}</div>
+          </div>
+          <nav class="nav">
+            {% for endpoint, label in nav_items.get(current_user.role_code, []) %}
+              <a href="{{ url_for(endpoint) }}" class="{% if request.endpoint == endpoint %}active{% endif %}">{{ label }}</a>
+            {% endfor %}
+            {% if current_user.role_code == 'admin' %}
+              <a href="{{ url_for('admin_consumables') }}" class="{% if request.endpoint == 'admin_consumables' %}active{% endif %}">Материалы</a>
+            {% endif %}
+          </nav>
+          <a class="logout-link" href="{{ url_for('logout') }}">Выход</a>
+        </aside>
+        <main class="content">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="flash-stack">
+                {% for category, message in messages %}
+                  <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    {% else %}
+      {% block auth_content %}{% endblock %}
+    {% endif %}
+  </body>
+</html>
